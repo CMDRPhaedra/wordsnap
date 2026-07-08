@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to unscramble words: strategy for Scrabble, Wordle & crosswords — wordsnap</title>
+<meta name="description" content="Practical strategies for unscrambling letters faster — vowel patterns, prefixes and suffixes, high-value tile placement, and how Wordle and crossword solving actually differ.">
+<link rel="canonical" href="https://wordsnap.chryse.co.uk/guide.html">
+<meta property="og:title" content="How to unscramble words: strategy for Scrabble, Wordle & crosswords">
+<meta property="og:description" content="Practical strategies for unscrambling letters faster — vowel patterns, prefixes and suffixes, high-value tile placement, and how Wordle and crossword solving actually differ.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://wordsnap.chryse.co.uk/guide.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="How to unscramble words: strategy for Scrabble, Wordle & crosswords">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How to unscramble words: strategy for Scrabble, Wordle & crosswords",
+  "description": "Practical strategies for unscrambling letters faster — vowel patterns, prefixes and suffixes, high-value tile placement, and how Wordle and crossword solving actually differ.",
+  "mainEntityOfPage": "https://wordsnap.chryse.co.uk/guide.html"
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --board-light: #E3DAC3;
+    --board-dark: #1B2420;
+    --tile-light: #FBF6E9;
+    --tile-dark: #2A362F;
+    --ink-light: #211F19;
+    --ink-dark: #EEE7D6;
+    --ink-soft-light: #6B6252;
+    --ink-soft-dark: #A6A08D;
+    --gold-light: #A8790B;
+    --gold-dark: #E0B24C;
+    --coral-light: #B14A28;
+    --coral-dark: #E28560;
+    --tile-border-light: rgba(33,31,25,0.16);
+    --tile-border-dark: rgba(238,231,214,0.14);
+    --board: var(--board-light);
+    --tile: var(--tile-light);
+    --ink: var(--ink-light);
+    --ink-soft: var(--ink-soft-light);
+    --gold: var(--gold-light);
+    --coral: var(--coral-light);
+    --tile-border: var(--tile-border-light);
+  }
+
+  html[data-theme="dark"] {
+    --board: var(--board-dark);
+    --tile: var(--tile-dark);
+    --ink: var(--ink-dark);
+    --ink-soft: var(--ink-soft-dark);
+    --gold: var(--gold-dark);
+    --coral: var(--coral-dark);
+    --tile-border: var(--tile-border-dark);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--board);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 0 8px;
+  }
+
+  .wordmark {
+    display: flex;
+    gap: 4px;
+    text-decoration: none;
+  }
+
+  .wordmark .tile {
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+  }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--tile);
+    border: 1px solid var(--tile-border);
+    border-radius: 999px;
+    padding: 6px 14px 6px 6px;
+    cursor: pointer;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    transition: background 0.25s ease, border-color 0.25s ease;
+  }
+
+  .theme-toggle .dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--tile);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .tile {
+    position: relative;
+    background: var(--tile);
+    border: 1px solid var(--tile-border);
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    color: var(--ink);
+    box-shadow: 0 2px 0 var(--tile-border);
+    text-transform: uppercase;
+    user-select: none;
+  }
+
+  article {
+    padding-top: 24px;
+  }
+
+  article h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 1.25;
+    margin: 0 0 10px;
+  }
+
+  article .dek {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin: 0 0 32px;
+  }
+
+  article h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin: 40px 0 12px;
+  }
+
+  article p {
+    font-size: 15px;
+    line-height: 1.75;
+    margin: 0 0 16px;
+  }
+
+  article ul {
+    font-size: 15px;
+    line-height: 1.75;
+    padding-left: 20px;
+    margin: 0 0 16px;
+  }
+
+  article li { margin-bottom: 6px; }
+
+  article strong { font-weight: 600; }
+
+  .example-row {
+    display: flex;
+    gap: 4px;
+    margin: 14px 0 20px;
+    flex-wrap: wrap;
+  }
+
+  .example-row .tile {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+
+  .cta-panel {
+    background: var(--tile);
+    border: 1px solid var(--tile-border);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    margin: 44px 0;
+  }
+
+  .cta-panel p {
+    margin: 0 0 14px;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    background: var(--gold);
+    color: var(--tile-light);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    text-decoration: none;
+  }
+
+  .ad-slot {
+    margin-top: 48px;
+    border: 1px dashed var(--tile-border);
+    border-radius: 12px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  footer a { color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <a class="wordmark" href="/" id="wordmark" aria-label="wordsnap home"></a>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+      <span class="dot" id="theme-dot">☀</span>
+      <span id="theme-label">light</span>
+    </button>
+  </nav>
+
+  <article>
+    <h1>How to unscramble words faster</h1>
+    <p class="dek">The letters don't rearrange themselves — but a few habits make the patterns jump out a lot quicker, whether you're stuck on a Scrabble rack, a Wordle guess, or a crossword clue.</p>
+
+    <h2>Start by separating vowels from consonants</h2>
+    <p>Most unscrambling gets easier the moment you split your letters into two piles: vowels (A, E, I, O, U) and consonants. English words need vowels roughly every two to three letters, so if your scramble has three consonants in a row, that's usually a clue about where a word boundary or a common consonant pair (like CH, SH, TH, ST, TR) belongs — not a sign you're stuck.</p>
+
+    <h2>Look for prefixes and suffixes first</h2>
+    <p>Common word endings are disproportionately useful because they're long and predictable. If your letters include -ING, -ED, -ER, -EST, -TION, -LY, or -NESS, set those aside mentally and see what's left. The same goes for prefixes: RE-, UN-, DIS-, PRE-, and OVER- often account for a third of a longer scrambled word in one move.</p>
+    <div class="example-row" id="example-1"></div>
+
+    <h2>Two- and three-letter words are your foundation</h2>
+    <p>In Scrabble specifically, short words matter more than their score suggests — they're what let you build parallel words and open up the board. Words like AT, IN, ON, TO, BE, IT, OR, and AS come up constantly, and knowing them cold speeds up every rack you're dealt. wordsnap's length filter is built around exactly this — narrow to 2 or 3 letters first when you're hunting for a quick play rather than the biggest score.</p>
+
+    <h2>High-value letters change your priorities</h2>
+    <p>J, Q, X, and Z score the most in Scrabble, but they're also the hardest to place — so the real skill isn't finding a word that uses them, it's finding one you can land on a double or triple letter square. Q is the trickiest since so few words don't pair it with U (QI and QAT are the rare exceptions worth memorizing). If you're holding an awkward high-value letter, it's often better to hold it back a turn and wait for the right board position than to force a low-scoring play.</p>
+
+    <h2>Wordle is a different puzzle, not just a smaller one</h2>
+    <p>Unscrambling for Wordle isn't really about anagrams at all — it's about eliminating letters efficiently. Your first couple of guesses should maximize how many common letters you test, ideally using words that share no repeated letters. E, A, R, I, O, T, N, and S cover the most ground statistically, so an opener like CRATE or SLATE tends to outperform something with rarer letters even if both are "valid" five-letter words. Once you have a few confirmed letters and their positions, that's when a length-and-pattern based unscramble search actually helps — plugging in the letters you know plus your remaining rack.</p>
+
+    <h2>Crosswords lean on constraints, not just letters</h2>
+    <p>Crossword solving is usually the reverse problem: you don't have a fixed set of scrambled letters, you have a partial word with gaps from crossing answers. The same instincts still apply — check for a recognizable prefix or suffix first, then think about what letter patterns are actually common in English before guessing rare ones. A word with an unusual letter like Q, X, or Z in a crossword grid is often a strong signal you've got a crossing answer wrong, since those letters are rare enough that two of them intersecting is unlikely.</p>
+
+    <h2>When to just plug it into a tool</h2>
+    <p>None of this replaces brute-force checking when you're truly stuck, or want to double-check a play before committing it on a Scrabble board where mistakes cost a turn. That's the gap a tool fills — instant, exhaustive, and without the risk of missing a word your own memory doesn't surface fast enough.</p>
+
+    <div class="cta-panel">
+      <p>Have some letters right now? Drop them in and see everything they can make.</p>
+      <a class="cta-btn" href="/">Unscramble your letters</a>
+    </div>
+  </article>
+
+  <div class="ad-slot">ad placeholder — leaderboard 728×90</div>
+
+  <footer>wordsnap · built for word game players · <a href="/">home</a></footer>
+
+</div>
+
+<script>
+  function makeTile(letter) {
+    const el = document.createElement('div');
+    el.className = 'tile';
+    el.textContent = letter;
+    return el;
+  }
+
+  const wordmarkEl = document.getElementById('wordmark');
+  'wordsnap'.split('').forEach((ch, i) => {
+    wordmarkEl.appendChild(makeTile(ch));
+  });
+
+  const ex1 = document.getElementById('example-1');
+  'REPLANTING'.split('').forEach(ch => ex1.appendChild(makeTile(ch)));
+
+  const root = document.documentElement;
+  const toggleBtn = document.getElementById('theme-toggle');
+  const themeDot = document.getElementById('theme-dot');
+  const themeLabel = document.getElementById('theme-label');
+  let theme = 'light';
+
+  function applyTheme() {
+    root.setAttribute('data-theme', theme);
+    themeDot.textContent = theme === 'light' ? '☀' : '☾';
+    themeLabel.textContent = theme;
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    theme = theme === 'light' ? 'dark' : 'light';
+    applyTheme();
+  });
+
+  applyTheme();
+</script>
+</body>
+</html>
