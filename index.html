@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>wordsnap — unscramble letters, find every word</title>
+<meta name="description" content="Type your scrambled letters and wordsnap finds every real word hiding inside them — built for Scrabble, Wordle, and crossword solving.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --board-light: #E3DAC3;
+    --board-dark: #1B2420;
+    --tile-light: #FBF6E9;
+    --tile-dark: #2A362F;
+    --ink-light: #211F19;
+    --ink-dark: #EEE7D6;
+    --ink-soft-light: #6B6252;
+    --ink-soft-dark: #A6A08D;
+    --gold-light: #A8790B;
+    --gold-dark: #E0B24C;
+    --coral-light: #B14A28;
+    --coral-dark: #E28560;
+    --tile-border-light: rgba(33,31,25,0.16);
+    --tile-border-dark: rgba(238,231,214,0.14);
+    --board: var(--board-light);
+    --tile: var(--tile-light);
+    --ink: var(--ink-light);
+    --ink-soft: var(--ink-soft-light);
+    --gold: var(--gold-light);
+    --coral: var(--coral-light);
+    --tile-border: var(--tile-border-light);
+  }
+
+  html[data-theme="dark"] {
+    --board: var(--board-dark);
+    --tile: var(--tile-dark);
+    --ink: var(--ink-dark);
+    --ink-soft: var(--ink-soft-dark);
+    --gold: var(--gold-dark);
+    --coral: var(--coral-dark);
+    --tile-border: var(--tile-border-dark);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--board);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ---------- Nav ---------- */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 0 8px;
+  }
+
+  .wordmark {
+    display: flex;
+    gap: 4px;
+  }
+
+  .wordmark .tile {
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+  }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--tile);
+    border: 1px solid var(--tile-border);
+    border-radius: 999px;
+    padding: 6px 14px 6px 6px;
+    cursor: pointer;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    transition: background 0.25s ease, border-color 0.25s ease;
+  }
+
+  .theme-toggle .dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--tile);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* ---------- Tile primitive ---------- */
+  .tile {
+    position: relative;
+    background: var(--tile);
+    border: 1px solid var(--tile-border);
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    color: var(--ink);
+    box-shadow: 0 2px 0 var(--tile-border);
+    text-transform: uppercase;
+    user-select: none;
+  }
+
+  .tile .pts {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 8px;
+    font-weight: 400;
+    color: var(--gold);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    padding: 40px 0 8px;
+    text-align: center;
+  }
+
+  .hero-tiles {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+
+  .hero-tiles .tile {
+    width: 46px;
+    height: 46px;
+    font-size: 22px;
+    opacity: 0;
+    transform: translateY(-14px) rotate(-6deg);
+    animation: drop 0.5s cubic-bezier(.2,.9,.3,1.3) forwards;
+  }
+
+  @keyframes drop {
+    to { opacity: 1; transform: translateY(0) rotate(0deg); }
+  }
+
+  .hero p.tagline {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 20px;
+    color: var(--ink-soft);
+    max-width: 440px;
+    margin: 0 auto 6px;
+    line-height: 1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-tiles .tile { animation: none; opacity: 1; transform: none; }
+  }
+
+  /* ---------- Input panel ---------- */
+  .panel {
+    background: var(--tile);
+    border: 1px solid var(--tile-border);
+    border-radius: 16px;
+    padding: 22px 22px 18px;
+    margin-top: 28px;
+  }
+
+  .panel label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  #letters-input {
+    flex: 1;
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--tile-border);
+    background: var(--board);
+    color: var(--ink);
+    min-width: 0;
+  }
+
+  #letters-input:focus {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+  }
+
+  #letters-input::placeholder {
+    color: var(--ink-soft);
+    opacity: 0.5;
+  }
+
+  .go-btn {
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    background: var(--gold);
+    color: var(--tile-light);
+    border: none;
+    border-radius: 10px;
+    padding: 0 22px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.12s ease;
+  }
+
+  .go-btn:active { transform: scale(0.97); }
+
+  .chips {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid var(--tile-border);
+    color: var(--ink-soft);
+    border-radius: 999px;
+    padding: 5px 13px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .chip.active {
+    background: var(--coral);
+    border-color: var(--coral);
+    color: var(--tile-light);
+  }
+
+  /* ---------- Results ---------- */
+  .results-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 30px 0 12px;
+  }
+
+  .results-head h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 18px;
+    margin: 0;
+  }
+
+  .results-head span {
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .result-card {
+    background: var(--tile);
+    border: 1px solid var(--tile-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .result-card .letters {
+    display: flex;
+    gap: 2px;
+  }
+
+  .result-card .tile {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+    border-radius: 4px;
+  }
+
+  .result-card .tile .pts { display: none; }
+
+  .result-card .len {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  /* ---------- How it works ---------- */
+  .how {
+    margin-top: 56px;
+  }
+
+  .how h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .how-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .how-step {
+    text-align: center;
+  }
+
+  .how-step .tile {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+    margin: 0 auto 12px;
+  }
+
+  .how-step p {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .how-step strong {
+    display: block;
+    color: var(--ink);
+    font-size: 14px;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  /* ---------- Ad slot ---------- */
+  .ad-slot {
+    margin-top: 48px;
+    border: 1px dashed var(--tile-border);
+    border-radius: 12px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 520px) {
+    .how-steps { grid-template-columns: 1fr; gap: 24px; }
+    .hero-tiles .tile { width: 36px; height: 36px; font-size: 17px; }
+    .input-row { flex-direction: column; }
+    .go-btn { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <div class="wordmark" id="wordmark"></div>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+      <span class="dot" id="theme-dot">☀</span>
+      <span id="theme-label">light</span>
+    </button>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-tiles" id="hero-tiles"></div>
+    <p class="tagline">Type the letters you've got. We'll find every real word hiding inside them.</p>
+  </header>
+
+  <section class="panel">
+    <label for="letters-input">your letters</label>
+    <div class="input-row">
+      <input id="letters-input" type="text" maxlength="15" placeholder="e.g. RATSEL" autocomplete="off" spellcheck="false">
+      <button class="go-btn" id="go-btn">Unscramble</button>
+    </div>
+    <div class="chips" id="chips">
+      <button class="chip active" data-len="0">all lengths</button>
+      <button class="chip" data-len="3">3</button>
+      <button class="chip" data-len="4">4</button>
+      <button class="chip" data-len="5">5</button>
+      <button class="chip" data-len="6">6</button>
+      <button class="chip" data-len="7">7+</button>
+    </div>
+  </section>
+
+  <div class="results-head">
+    <h2>words found</h2>
+    <span id="result-count">enter letters above</span>
+  </div>
+  <div class="results-grid" id="results"></div>
+
+  <section class="how">
+    <h2>how it works</h2>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="tile" data-letter="1"></div>
+        <strong>Enter your letters</strong>
+        <p>Type the tiles you have on your rack, board, or puzzle — any order.</p>
+      </div>
+      <div class="how-step">
+        <div class="tile" data-letter="2"></div>
+        <strong>We check every word</strong>
+        <p>wordsnap tests every combination against its dictionary, instantly.</p>
+      </div>
+      <div class="how-step">
+        <div class="tile" data-letter="3"></div>
+        <strong>Filter and play</strong>
+        <p>Narrow by length to find the highest-scoring word for your move.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="ad-slot">ad placeholder — leaderboard 728×90</div>
+
+  <footer>wordsnap · built for word game players</footer>
+
+</div>
+
+<script src="words.js"></script>
+<script>
+  // ---------- Letter point values (Scrabble-style, for the tile decoration) ----------
+  const POINTS = {
+    a:1,e:1,i:1,o:1,u:1,l:1,n:1,s:1,t:1,r:1,
+    d:2,g:2,
+    b:3,c:3,m:3,p:3,
+    f:4,h:4,v:4,w:4,y:4,
+    k:5,
+    j:8,x:8,
+    q:10,z:10
+  };
+
+  function makeTile(letter, big) {
+    const el = document.createElement('div');
+    el.className = 'tile';
+    el.textContent = letter;
+    const pts = document.createElement('span');
+    pts.className = 'pts';
+    pts.textContent = POINTS[letter.toLowerCase()] || '';
+    el.appendChild(pts);
+    return el;
+  }
+
+  // ---------- Wordmark ----------
+  const wordmarkEl = document.getElementById('wordmark');
+  'wordsnap'.split('').forEach((ch, i) => {
+    const t = makeTile(ch);
+    t.style.animationDelay = (i * 0.03) + 's';
+    wordmarkEl.appendChild(t);
+  });
+
+  // ---------- Hero tiles ----------
+  const heroEl = document.getElementById('hero-tiles');
+  'UNSCRAMBLE'.split('').forEach((ch, i) => {
+    const t = makeTile(ch);
+    t.style.animationDelay = (i * 0.045) + 's';
+    heroEl.appendChild(t);
+  });
+
+  // ---------- How-it-works numbered tiles ----------
+  document.querySelectorAll('.how-step .tile').forEach(el => {
+    el.textContent = el.dataset.letter;
+  });
+
+  // ---------- Theme toggle ----------
+  const root = document.documentElement;
+  const toggleBtn = document.getElementById('theme-toggle');
+  const themeDot = document.getElementById('theme-dot');
+  const themeLabel = document.getElementById('theme-label');
+  let theme = 'light';
+
+  function applyTheme() {
+    root.setAttribute('data-theme', theme);
+    themeDot.textContent = theme === 'light' ? '☀' : '☾';
+    themeLabel.textContent = theme;
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    theme = theme === 'light' ? 'dark' : 'light';
+    applyTheme();
+  });
+
+  applyTheme();
+
+  // ---------- Unscramble logic ----------
+  function letterCounts(str) {
+    const counts = {};
+    for (const ch of str) counts[ch] = (counts[ch] || 0) + 1;
+    return counts;
+  }
+
+  function canMakeFrom(word, availableCounts) {
+    const need = letterCounts(word);
+    for (const ch in need) {
+      if (!availableCounts[ch] || availableCounts[ch] < need[ch]) return false;
+    }
+    return true;
+  }
+
+  const input = document.getElementById('letters-input');
+  const goBtn = document.getElementById('go-btn');
+  const resultsEl = document.getElementById('results');
+  const countEl = document.getElementById('result-count');
+  const chips = document.querySelectorAll('.chip');
+
+  let activeLen = 0;
+
+  function runSearch() {
+    const raw = input.value.toLowerCase().replace(/[^a-z]/g, '');
+    if (!raw) {
+      resultsEl.innerHTML = '<div class="empty-state">Type some letters to get started.</div>';
+      countEl.textContent = 'enter letters above';
+      return;
+    }
+
+    const avail = letterCounts(raw);
+    let found = WORD_LIST.filter(w => w.length <= raw.length && canMakeFrom(w, avail));
+
+    if (activeLen === 7) {
+      found = found.filter(w => w.length >= 7);
+    } else if (activeLen > 0) {
+      found = found.filter(w => w.length === activeLen);
+    }
+
+    found.sort((a, b) => b.length - a.length || a.localeCompare(b));
+
+    countEl.textContent = found.length + (found.length === 1 ? ' word found' : ' words found');
+
+    if (found.length === 0) {
+      resultsEl.innerHTML = '<div class="empty-state">No matches yet — try different letters or a wider length filter.</div>';
+      return;
+    }
+
+    resultsEl.innerHTML = '';
+    found.slice(0, 200).forEach(word => {
+      const card = document.createElement('div');
+      card.className = 'result-card';
+
+      const lettersWrap = document.createElement('div');
+      lettersWrap.className = 'letters';
+      word.split('').forEach(ch => lettersWrap.appendChild(makeTile(ch)));
+
+      const lenTag = document.createElement('span');
+      lenTag.className = 'len';
+      lenTag.textContent = word.length;
+
+      card.appendChild(lettersWrap);
+      card.appendChild(lenTag);
+      resultsEl.appendChild(card);
+    });
+  }
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeLen = Number(chip.dataset.len);
+      runSearch();
+    });
+  });
+
+  goBtn.addEventListener('click', runSearch);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') runSearch(); });
+  input.addEventListener('input', runSearch);
+
+  // ---------- Load the full dictionary if present, else fall back to the starter list ----------
+  fetch('words.txt')
+    .then(res => {
+      if (!res.ok) throw new Error('no words.txt found');
+      return res.text();
+    })
+    .then(text => {
+      const full = text.split(/\r?\n/).map(w => w.trim().toLowerCase()).filter(w => w.length >= 3 && /^[a-z]+$/.test(w));
+      if (full.length > WORD_LIST.length) {
+        WORD_LIST = full;
+        countEl.textContent = full.length.toLocaleString() + ' word dictionary loaded — try it out';
+      }
+    })
+    .catch(() => {
+      // words.txt not present yet — keep using the starter list bundled in words.js
+    })
+    .finally(() => {
+      input.value = 'RATSEL';
+      runSearch();
+    });
+</script>
+</body>
+</html>
